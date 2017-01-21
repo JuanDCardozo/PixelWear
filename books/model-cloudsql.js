@@ -16,6 +16,7 @@
 const extend = require('lodash').assign;
 const mysql = require('mysql');
 const config = require('../config');
+const background = require('../lib/background');
 
 function getConnection () {
   const options = {
@@ -31,7 +32,6 @@ function getConnection () {
   return mysql.createConnection(options);
 }
 
-// [START list]
 function list (limit, token, cb) {
   token = token ? parseInt(token, 10) : 0;
   const connection = getConnection();
@@ -48,15 +48,34 @@ function list (limit, token, cb) {
   );
   connection.end();
 }
-// [END list]
+
+function listBy (userId, limit, token, cb) {
+  token = token ? parseInt(token, 10) : 0;
+  const connection = getConnection();
+  connection.query(
+    'SELECT * FROM `books` WHERE `createdById` = ? LIMIT ? OFFSET ?',
+    [userId, limit, token],
+    (err, results) => {
+      if (err) {
+        cb(err);
+        return;
+      }
+      const hasMore = results.length === limit ? token + results.length : false;
+      cb(null, results, hasMore);
+    });
+  connection.end();
+}
 
 // [START create]
-function create (data, cb) {
+function create (data, queueBook, cb) {
   const connection = getConnection();
   connection.query('INSERT INTO `books` SET ?', data, (err, res) => {
     if (err) {
       cb(err);
       return;
+    }
+    if (queueBook) {
+      background.queueBook(res.insertId);
     }
     read(res.insertId, cb);
   });
@@ -85,13 +104,16 @@ function read (id, cb) {
 }
 
 // [START update]
-function update (id, data, cb) {
+function update (id, data, queueBook, cb) {
   const connection = getConnection();
   connection.query(
     'UPDATE `books` SET ? WHERE `id` = ?', [data, id], (err) => {
       if (err) {
         cb(err);
         return;
+      }
+      if (queueBook) {
+        background.queueBook(id);
       }
       read(id, cb);
     });
@@ -108,6 +130,7 @@ function _delete (id, cb) {
 module.exports = {
   createSchema: createSchema,
   list: list,
+  listBy: listBy,
   create: create,
   read: read,
   update: update,
@@ -119,8 +142,8 @@ if (module === require.main) {
   prompt.start();
 
   console.log(
-    `Running this script directly will allow you to initialize your mysql database.
-    This script will not modify any existing tables.`);
+    `Running this script directly will allow you to initialize your mysql
+    database.\n This script will not modify any existing tables.\n`);
 
   prompt.get(['user', 'password'], (err, result) => {
     if (err) {

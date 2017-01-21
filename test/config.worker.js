@@ -14,17 +14,21 @@
 'use strict';
 
 const path = require(`path`);
+const projectId = process.env.GCLOUD_PROJECT;
 const test = `6-pubsub`;
 
 module.exports = {
   test: test,
+  url: `http://localhost:8081`,
+  demoUrl: `http://${test}-dot-worker-dot-${projectId}.appspot-preview.com`,
+  yaml: `worker.yaml`,
   cwd: path.resolve(path.join(__dirname, `../`)),
   cmd: `node`,
-  args: [`app.js`],
-  msg: `Bookshelf`,
-  port: 8086,
+  args: [`worker.js`],
+  msg: `This worker has processed`,
   env: {
-    SUBSCRIPTION_NAME: `${test}-shared-worker-subscription`,
-    TOPIC_NAME: `${test}-book-process-queue`
+    PORT: 8081,
+    SUBSCRIPTION_NAME: `shared-worker-subscription-${test}`,
+    TOPIC_NAME: `book-process-queue-${test}`
   }
 };

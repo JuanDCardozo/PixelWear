@@ -11,9 +11,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+# [START yaml]
+module: worker
 runtime: nodejs
-env: flex
+vm: true
+
+env_variables:
+  SCRIPT: worker.js
 
 # Temporary setting to keep gcloud from uploading node_modules
 skip_files:
  - ^node_modules$
+# [END yaml]

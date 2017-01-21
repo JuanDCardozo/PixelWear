@@ -85,7 +85,7 @@ module.exports = (DATA_BACKEND) => {
       it(`should post to add book form`, (done) => {
         utils.getRequest(config)
           .post(`/books/add`)
-          .send(`title=my%20book`)
+          .field(`title`, `my book`)
           .expect(302)
           .expect((response) => {
             const location = response.headers.location;
@@ -144,7 +144,7 @@ module.exports = (DATA_BACKEND) => {
         const expected = `Redirecting to /books/${id}`;
         utils.getRequest(config)
           .post(`/books/${id}/edit`)
-          .send(`title=my%20other%20book`)
+          .field(`title`, `my other book`)
           .expect(302)
           .expect((response) => {
             assert.equal(response.text.includes(expected), true);
@@ -159,8 +159,6 @@ module.exports = (DATA_BACKEND) => {
           .get(`/books/${id}/edit`)
           .expect(200)
           .expect((response) => {
-            console.log('RT', response.text);
-            console.log('expected', expected);
             assert.equal(response.text.includes(expected), true);
           })
           .end(done);

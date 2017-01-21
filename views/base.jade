@@ -27,6 +27,17 @@ html(lang="en")
         ul.nav.navbar-nav
           li
             a(href="/books") Books
+          li
+            a(href="/books/mine") My Books
+
+        p.navbar-text.navbar-right
+          if profile
+            if profile.image
+              img.img-circle(src=profile.image, width=24)
+            span #{profile.displayName} &nbsp;
+              a(href=logout) (logout)
+          else
+            a(href=login) Login
 
     .container
       block content

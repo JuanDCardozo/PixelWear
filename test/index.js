@@ -17,12 +17,21 @@ const config = require(`./config`);
 const utils = require(`nodejs-repo-tools`);
 
 describe(`${config.test}/`, () => {
+  let topicName;
+
+  before(() => {
+    const appConfig = require(`../config`);
+    topicName = appConfig.get(`TOPIC_NAME`);
+    appConfig.set(`TOPIC_NAME`, `${topicName}-${config.test}`);
+  });
+
   if (!process.env.E2E_TESTS) {
     it(`should install dependencies`, (done) => {
       utils.testInstallation(config, done);
     }).timeout(120 * 1000);
   }
   require(`./app.test`);
+  require(`./worker.test`);
   describe(`books/`, () => {
     const appConfig = require(`../config`);
     const DATA_BACKEND = appConfig.get(`DATA_BACKEND`);
@@ -38,5 +47,16 @@ describe(`${config.test}/`, () => {
       require(`./api.test`)(`mongodb`);
       require(`./crud.test`)(`mongodb`);
     }
+  });
+  if (!process.env.E2E_TESTS) {
+    describe(`lib/`, () => {
+      require(`./background.test`);
+      require(`./oauth2.test`);
+    });
+  }
+
+  afterEach(() => {
+    const appConfig = require(`../config`);
+    appConfig.set(`TOPIC_NAME`, topicName);
   });
 });

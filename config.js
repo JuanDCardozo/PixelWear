@@ -23,18 +23,29 @@ nconf
   .argv()
   // 2. Environment variables
   .env([
+    'CLOUD_BUCKET',
     'DATA_BACKEND',
     'GCLOUD_PROJECT',
     'MONGO_URL',
     'MONGO_COLLECTION',
     'MYSQL_USER',
     'MYSQL_PASSWORD',
-    'PORT'
+    'NODE_ENV',
+    'OAUTH2_CLIENT_ID',
+    'OAUTH2_CLIENT_SECRET',
+    'OAUTH2_CALLBACK',
+    'PORT',
+    'SECRET',
+    'SUBSCRIPTION_NAME',
+    'TOPIC_NAME'
   ])
   // 3. Config file
   .file({ file: path.join(__dirname, 'config.json') })
   // 4. Defaults
   .defaults({
+    // Typically you will create a bucket with the same name as your project ID.
+    CLOUD_BUCKET: '',
+
     // dataBackend can be 'datastore', 'cloudsql', or 'mongodb'. Be sure to
     // configure the appropriate settings for each storage engine below.
     // If you are unsure, use datastore as it requires no additional
@@ -44,6 +55,9 @@ nconf
     // This is the id of your project in the Google Cloud Developers Console.
     GCLOUD_PROJECT: '',
 
+    // Connection url for the Memcache instance used to store session data
+    MEMCACHE_URL: 'localhost:11211',
+
     // MongoDB connection string
     // https://docs.mongodb.org/manual/reference/connection-string/
     MONGO_URL: 'mongodb://localhost:27017',
@@ -52,12 +66,24 @@ nconf
     MYSQL_USER: '',
     MYSQL_PASSWORD: '',
 
+    OAUTH2_CLIENT_ID: '',
+    OAUTH2_CLIENT_SECRET: '',
+    OAUTH2_CALLBACK: 'http://localhost:8080/auth/google/callback',
+
     // Port the HTTP server
-    PORT: 8080
+    PORT: 8080,
+
+    SECRET: 'keyboardcat',
+
+    SUBSCRIPTION_NAME: 'shared-worker-subscription',
+    TOPIC_NAME: 'book-process-queue'
   });
 
 // Check for required settings
 checkConfig('GCLOUD_PROJECT');
+checkConfig('CLOUD_BUCKET');
+checkConfig('OAUTH2_CLIENT_ID');
+checkConfig('OAUTH2_CLIENT_SECRET');
 
 if (nconf.get('DATA_BACKEND') === 'cloudsql') {
   checkConfig('MYSQL_USER');

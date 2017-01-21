@@ -50,7 +50,7 @@ router.get('/', (req, res, next) => {
  * Create a new book.
  */
 router.post('/', (req, res, next) => {
-  getModel().create(req.body, (err, entity) => {
+  getModel().create(req.body, true, (err, entity) => {
     if (err) {
       next(err);
       return;
@@ -80,7 +80,7 @@ router.get('/:book', (req, res, next) => {
  * Update a book.
  */
 router.put('/:book', (req, res, next) => {
-  getModel().update(req.params.book, req.body, (err, entity) => {
+  getModel().update(req.params.book, req.body, true, (err, entity) => {
     if (err) {
       next(err);
       return;

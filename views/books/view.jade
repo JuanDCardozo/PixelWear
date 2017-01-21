@@ -26,9 +26,12 @@ block content
       span  Delete book
 
   .media
+    .media-left
+      img(src=book.imageUrl || "http://placekitten.com/g/128/192")
     .media-body
       h4= book.title
         | &nbsp;
         small= book.publishedDate
       h5 By #{book.author||'unknown'}
       p= book.description
+      small Added by #{book.createdBy}

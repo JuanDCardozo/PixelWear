@@ -58,6 +58,21 @@ describe(`app.js`, () => {
     }, Error, getMsg(`GCLOUD_PROJECT`));
 
     nconfMock.GCLOUD_PROJECT = `project`;
+    assert.throws(() => {
+      proxyquire(`../config`, { nconf: nconfMock });
+    }, Error, getMsg(`CLOUD_BUCKET`));
+
+    nconfMock.CLOUD_BUCKET = `bucket`;
+    assert.throws(() => {
+      proxyquire(`../config`, { nconf: nconfMock });
+    }, Error, getMsg(`OAUTH2_CLIENT_ID`));
+
+    nconfMock.OAUTH2_CLIENT_ID = `foo`;
+    assert.throws(() => {
+      proxyquire(`../config`, { nconf: nconfMock });
+    }, Error, getMsg(`OAUTH2_CLIENT_SECRET`));
+
+    nconfMock.OAUTH2_CLIENT_SECRET = `bar`;
     assert.doesNotThrow(() => {
       proxyquire(`../config`, { nconf: nconfMock });
     });

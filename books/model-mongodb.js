@@ -16,10 +16,10 @@
 const MongoClient = require('mongodb').MongoClient;
 const ObjectID = require('mongodb').ObjectID;
 const config = require('../config');
+const background = require('../lib/background');
 
 let collection;
 
-// [START translate]
 function fromMongo (item) {
   if (Array.isArray(item) && item.length) {
     item = item[0];
@@ -33,7 +33,6 @@ function toMongo (item) {
   delete item.id;
   return item;
 }
-// [END translate]
 
 function getCollection (cb) {
   if (collection) {
@@ -52,7 +51,6 @@ function getCollection (cb) {
   });
 }
 
-// [START list]
 function list (limit, token, cb) {
   token = token ? parseInt(token, 10) : 0;
   if (isNaN(token)) {
@@ -78,10 +76,34 @@ function list (limit, token, cb) {
       });
   });
 }
-// [END list]
+
+function listBy (userid, limit, token, cb) {
+  token = token ? parseInt(token, 10) : 0;
+  if (isNaN(token)) {
+    cb(new Error('invalid token'));
+    return;
+  }
+  getCollection((err, collection) => {
+    if (err) {
+      return err;
+    }
+    collection.find({createdById: userid})
+      .skip(token)
+      .limit(limit)
+      .toArray((err, results) => {
+        if (err) {
+          cb(err);
+          return;
+        }
+        const hasMore =
+          results.length === limit ? token + results.length : false;
+        cb(null, results.map(fromMongo), hasMore);
+      });
+  });
+}
 
 // [START create]
-function create (data, cb) {
+function create (data, queueBook, cb) {
   getCollection((err, collection) => {
     if (err) {
       cb(err);
@@ -93,6 +115,9 @@ function create (data, cb) {
         return;
       }
       const item = fromMongo(result.ops);
+      if (queueBook) {
+        background.queueBook(item.id);
+      }
       cb(null, item);
     });
   });
@@ -125,7 +150,7 @@ function read (id, cb) {
 }
 
 // [START update]
-function update (id, data, cb) {
+function update (id, data, queueBook, cb) {
   getCollection((err, collection) => {
     if (err) {
       cb(err);
@@ -140,8 +165,10 @@ function update (id, data, cb) {
           cb(err);
           return;
         }
-        read(id, cb);
-        return;
+        if (queueBook) {
+          background.queueBook(id);
+        }
+        return read(id, cb);
       }
     );
   });
@@ -161,9 +188,10 @@ function _delete (id, cb) {
 }
 
 module.exports = {
-  create,
-  read,
-  update,
+  create: create,
+  read: read,
+  update: update,
   delete: _delete,
-  list
+  list: list,
+  listBy: listBy
 };
