@@ -19,6 +19,7 @@ const images = require('../lib/images');
 const oauth2 = require('../lib/oauth2');
 var multer = require('multer');
 const storage = require('@google-cloud/storage');
+var Quiche = require('quiche');
 
 
 // Set up auth
@@ -81,23 +82,15 @@ router.get('/login', (req, res, next)=> {
 
 //test
 router.get('/stats', (req, res, next) => {
-
-  var chart = Highcharts.chart('container', {
-    chart: {
-            width: 300,
-            height: 300,
-            defaultSeriesType: 'bar'
-        },
-        legend: {
-            enabled: false
-        },
-        title: {
-            text: 'Highcharts rendered by Node!'
-        },
-        series: [{
-            data: [ 1, 2, 3, 4, 5, 6 ]
-        }]
-      });
+  var pie = new Quiche('pie');
+  pie.setTransparentBackground(); // Make background transparent
+  pie.addData(3000, 'Jacket', 'FF0000');
+  pie.addData(2900, 'Pants', '0000FF');
+  pie.addData(1500, 'T-shirt', '00FF00');
+  pie.setLabel(['Jacket','Pants','T-shirt']); // Add labels to pie segments
+  var image = pie.getUrl(true); // First param controls http vs. https
+  console.log(image);
+  res.render('books/stats.jade', {chart: image});
 });
 
 /**
@@ -169,7 +162,7 @@ router.post(
     if (req.file && req.file.cloudStoragePublicUrl) {
       data.imageUrl = req.file.cloudStoragePublicUrl;
 
-      detectLabelsGCS(bucket, 'image');
+      //detectLabelsGCS(bucket, 'image');
 
       // console.log(file);
       // vision.detect(file, types, function(err, detections, apiResponse) {
@@ -185,14 +178,14 @@ router.post(
       // });
     }
 
-    // Save the data to the database.
-    // getModel().create(data, true, (err, savedData) => {
-    //   if (err) {
-    //     next(err);
-    //     return;
-    //   }
-    //   res.redirect(`${req.baseUrl}/${savedData.id}`);
-    // });
+    //Save the data to the database.
+    getModel().create(data, true, (err, savedData) => {
+      if (err) {
+        next(err);
+        return;
+      }
+      res.redirect(`${req.baseUrl}/${savedData.id}`);
+    });
   }
 );
 // [END add]
