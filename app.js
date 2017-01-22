@@ -67,7 +67,10 @@ app.use('/api/books', require('./books/api'));
 
 // Redirect root to /books
 app.get('/', (req, res) => {
-  res.redirect('/books');
+
+      res.redirect('/books')
+  
+;
 });
 
 // Add the error logger after all middleware and routes so that

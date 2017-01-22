@@ -58,14 +58,6 @@ nconf
     // Connection url for the Memcache instance used to store session data
     MEMCACHE_URL: 'localhost:11211',
 
-    // MongoDB connection string
-    // https://docs.mongodb.org/manual/reference/connection-string/
-    MONGO_URL: 'mongodb://localhost:27017',
-    MONGO_COLLECTION: 'books',
-
-    MYSQL_USER: '',
-    MYSQL_PASSWORD: '',
-
     OAUTH2_CLIENT_ID: '',
     OAUTH2_CLIENT_SECRET: '',
     OAUTH2_CALLBACK: 'http://localhost:8080/auth/google/callback',
@@ -84,17 +76,6 @@ checkConfig('GCLOUD_PROJECT');
 checkConfig('CLOUD_BUCKET');
 checkConfig('OAUTH2_CLIENT_ID');
 checkConfig('OAUTH2_CLIENT_SECRET');
-
-if (nconf.get('DATA_BACKEND') === 'cloudsql') {
-  checkConfig('MYSQL_USER');
-  checkConfig('MYSQL_PASSWORD');
-  if (nconf.get('NODE_ENV') === 'production') {
-    checkConfig('INSTANCE_CONNECTION_NAME');
-  }
-} else if (nconf.get('DATA_BACKEND') === 'mongodb') {
-  checkConfig('MONGO_URL');
-  checkConfig('MONGO_COLLECTION');
-}
 
 function checkConfig (setting) {
   if (!nconf.get(setting)) {

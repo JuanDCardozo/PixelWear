@@ -35,22 +35,36 @@ router.use((req, res, next) => {
 });
 
 /**
+ * GET login
+ *
+ * If the user is not logged in then go to login.jade
+ */
+router.get('/', (req, res, next) => {
+  console.log(req.user);
+    if(req.user){
+
+      res.redirect('/books/mine');
+    }else{
+      res.redirect('/books/login');
+
+  }
+});
+
+router.get('/login', (req, res, next)=> {
+  if(req.user){
+    res.redirect('/books/mine');
+  }else{
+    res.render('login.jade');
+  }
+});
+
+
+
+/**
  * GET /books/add
  *
  * Display a page of books (up to ten at a time).
  */
-router.get('/', (req, res, next) => {
-  getModel().list(10, req.query.pageToken, (err, entities, cursor) => {
-    if (err) {
-      next(err);
-      return;
-    }
-    res.render('books/list.jade', {
-      books: entities,
-      nextPageToken: cursor
-    });
-  });
-});
 
 // Use the oauth2.required middleware to ensure that only logged-in users
 // can access this handler.
