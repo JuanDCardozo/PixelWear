@@ -20,6 +20,7 @@ const oauth2 = require('../lib/oauth2');
 var multer = require('multer');
 const storage = require('@google-cloud/storage');
 
+
 // Set up auth
 var gcloud = require('gcloud')({
   keyFilename: 'Closet-c45e6ee5c6ce.json',
@@ -78,7 +79,26 @@ router.get('/login', (req, res, next)=> {
   }
 });
 
+//test
+router.get('/stats', (req, res, next) => {
 
+  var chart = Highcharts.chart('container', {
+    chart: {
+            width: 300,
+            height: 300,
+            defaultSeriesType: 'bar'
+        },
+        legend: {
+            enabled: false
+        },
+        title: {
+            text: 'Highcharts rendered by Node!'
+        },
+        series: [{
+            data: [ 1, 2, 3, 4, 5, 6 ]
+        }]
+      });
+});
 
 /**
  * GET /books/add

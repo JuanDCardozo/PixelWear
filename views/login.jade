@@ -1,10 +1,37 @@
 doctype html
 html(lang="en")
   head
-    title PixelWear - Node.js on Google Cloud Platform
+    title PixelWear - Virtualize Your Closet
     meta(charset='utf-8')
     meta(name="viewport", content="width=device-width, initial-scale=1")
     link(rel="stylesheet", href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css")
+    link(rel="stylesheet", type="text/css", href="/style.css")
   body
-  a(href=login) Login
-  h3
+    .navbar.navbar-default
+      .container
+        .navbar-header
+          .navbar-brand
+            a(href="#")
+              img(src="/pixelweartext.png")
+
+        ul.nav.navbar-nav
+          li
+          if profile
+            a(href="/books/mine") My Closet
+
+        p.navbar-text.navbar-right
+          if profile
+            if profile.image
+              img.img-circle(src=profile.image, width=24)
+            span #{profile.displayName} &nbsp;
+              a(href=logout) (logout)
+          else
+            a(href=login, class='btn btn-success btn-sm')
+              span  Log In
+    .container-fluid
+      .jumbotron
+        center
+          img(src="/pwbluepng_720.png")
+          h2 Imagine a world where your clothes are organized. With Pixel Wear's
+          h2 virtual closet technology, you'll never have troubling planning
+          h2 your next outfit. Click the Log In button to continue!

@@ -14,19 +14,22 @@
 doctype html
 html(lang="en")
   head
-    title PixelWear - Node.js on Google Cloud Platform
+    title PixelWear - Virtualize Your Closet
     meta(charset='utf-8')
     meta(name="viewport", content="width=device-width, initial-scale=1")
     link(rel="stylesheet", href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css")
+    link(rel="stylesheet", type="text/css", href="/style.css")
   body
     .navbar.navbar-default
       .container
         .navbar-header
-          .navbar-brand PixelWear
+          .navbar-brand
+            a(href="/books/mine")
+              img(src="/pixelweartext.png")
 
         ul.nav.navbar-nav
-          li
-            a(href="/books/mine") My Books
+          li.current
+            a(href="/books/mine") My Closet
 
         p.navbar-text.navbar-right
           if profile

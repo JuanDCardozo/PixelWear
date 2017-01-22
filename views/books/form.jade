@@ -14,16 +14,16 @@
 extends ../base.jade
 
 block content
-  h3 #{action} book
+  h3 #{action} Clothing
   form(method="POST", enctype="multipart/form-data")
     .form-group
-      label(for="title") Title
+      label(for="title") Clothing Name
       input.form-control(type="text", name="title", id="title", value=book.title)
     .form-group
-      label(for="author") Author
+      label(for="author") Owner
       input.form-control(type="text", name="author", id="author", value=book.author)
     .form-group
-      label(for="publishedDate") Date Published
+      label(for="publishedDate") Date Uploaded
       input.form-control(type="text", name="publishedDate", id="publishedDate", value=book.publishedDate)
     .form-group
       label(for="description") Description

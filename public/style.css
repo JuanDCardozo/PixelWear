@@ -1,0 +1,13 @@
+.jumbotron {
+  background-color: white;
+  font-family: sans-serif;
+}
+
+.navbar-brand img {
+  height: 130%;
+  width: auto;
+}
+
+.current {
+  border-bottom: 2px solid grey;
+}

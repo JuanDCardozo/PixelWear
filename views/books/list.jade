@@ -18,7 +18,7 @@ block content
 
   a(href="/books/add", class='btn btn-success btn-sm')
     i.glyphicon.glyphicon-plus
-    span  Add book
+    span  Add Clothing
 
   each book in books
     .media
@@ -30,7 +30,7 @@ block content
           p= book.author
 
   if !books.length
-    p No books found.
+    p No clothes found.
 
   if nextPageToken
     nav

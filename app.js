@@ -64,12 +64,12 @@ app.use(require('./lib/oauth2').router);
 // Books
 app.use('/books', require('./books/crud'));
 app.use('/api/books', require('./books/api'));
-
+app.use(express.static(__dirname + '/public'));
 // Redirect root to /books
 app.get('/', (req, res) => {
 
       res.redirect('/books')
-  
+
 ;
 });
 
