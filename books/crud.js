@@ -17,6 +17,17 @@ const express = require('express');
 const config = require('../config');
 const images = require('../lib/images');
 const oauth2 = require('../lib/oauth2');
+var multer = require('multer');
+
+// Set up auth
+var gcloud = require('gcloud')({
+  // keyFilename: 'Closet-c45e6ee5c6ce.json',
+  // projectId: 'closet-156315'
+  keyFilename: 'PixelWear-e4ca09b61f31.json',
+  projectId: 'pixelwear-156317'
+});
+
+var vision = gcloud.vision();
 
 function getModel () {
   return require(`./model-${config.get('DATA_BACKEND')}`);
@@ -109,6 +120,10 @@ router.post(
   images.multer.single('image'),
   images.sendUploadToGCS,
   (req, res, next) => {
+    // Choose what the Vision API should detect
+    // Choices are: faces, landmarks, labels, logos, properties, safeSearch, texts
+     var types = ['labels', 'properties'];
+
     const data = req.body;
 
     // If the user is logged in, set them as the creator of the book.
@@ -123,6 +138,18 @@ router.post(
     // in cloud storage.
     if (req.file && req.file.cloudStoragePublicUrl) {
       data.imageUrl = req.file.cloudStoragePublicUrl;
+
+      console.log("Before vision!");
+      vision.detect(req.file.path, types, function(err, detections, apiResponse) {
+        if (err) {
+          res.end('Cloud Vision Error');
+        } else {
+          // Write out the JSON output of the Vision API
+          console.log("I am here!");
+          res.write(JSON.stringify(detections, null, 4));
+          // console.log(JSON.stringify(detections, null, 4));
+        }
+      });
     }
 
     // Save the data to the database.
