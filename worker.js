@@ -18,7 +18,12 @@ if (process.env.NODE_ENV === 'production') {
   require('@google/cloud-trace').start();
   require('@google/cloud-debug');
 }
+var gcloud = require('gCloud')({
+  keyFilename: 'Closet-c45e6ee5c6ce.json',
+  projectId: 'closet-156315'
+});
 
+const path = require('path');
 const request = require('request');
 const waterfall = require('async').waterfall;
 const express = require('express');
@@ -173,6 +178,11 @@ function queryBooksApi (query, cb) {
       cb(null, JSON.parse(body));
     }
   );
+}
+
+function base64Image(src) {
+  var data = fs.readFileSync(src).toString('base64');
+  return util.format('data:%s;base64,%s', mime.lookup(src), data);
 }
 // [END query]
 

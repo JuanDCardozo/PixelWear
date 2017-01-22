@@ -1,7 +1,7 @@
 {
-  "GCLOUD_PROJECT": "pixelwear-156317",
+  "GCLOUD_PROJECT": "closet-156315",
   "DATA_BACKEND": "datastore",
-  "CLOUD_BUCKET": "pixelwear-156317",
+  "CLOUD_BUCKET": "closet-156315.appspot.com",
   "OAUTH2_CLIENT_ID": "93618931014-1fj58esjpj13o13t9nqm76jeum1e3jij.apps.googleusercontent.com",
   "OAUTH2_CLIENT_SECRET": "IBjXWPj_KPs5elrqRhS8fUOI",
   "OAUTH2_CALLBACK": "http://localhost:8080/auth/google/callback",

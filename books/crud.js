@@ -18,16 +18,25 @@ const config = require('../config');
 const images = require('../lib/images');
 const oauth2 = require('../lib/oauth2');
 var multer = require('multer');
+const storage = require('@google-cloud/storage');
 
 // Set up auth
 var gcloud = require('gcloud')({
-  // keyFilename: 'Closet-c45e6ee5c6ce.json',
-  // projectId: 'closet-156315'
-  keyFilename: 'PixelWear-e4ca09b61f31.json',
-  projectId: 'pixelwear-156317'
+  keyFilename: 'Closet-c45e6ee5c6ce.json',
+  projectId: 'closet-156315'
+  // keyFilename: 'PixelWear-e4ca09b61f31.json',
+  // projectId: 'pixelwear-156317'
+});
+
+// var storage = gcloud.storage();
+
+var gcs = storage({
+  keyFilename: 'Closet-c45e6ee5c6ce.json',
+  projectId: 'closet-156315'
 });
 
 var vision = gcloud.vision();
+
 
 function getModel () {
   return require(`./model-${config.get('DATA_BACKEND')}`);
@@ -117,17 +126,18 @@ router.get('/add', (req, res) => {
 // [START add]
 router.post(
   '/add',
-  images.multer.single('image'),
-  images.sendUploadToGCS,
+   images.multer.single('image'),
+   images.sendUploadToGCS,
   (req, res, next) => {
     // Choose what the Vision API should detect
     // Choices are: faces, landmarks, labels, logos, properties, safeSearch, texts
      var types = ['labels', 'properties'];
-
+    const bucket = gcs.bucket('CLOUD_BUCKET');
+    //const file = bucket.file(req.file.name);
     const data = req.body;
 
-    // If the user is logged in, set them as the creator of the book.
-    if (req.user) {
+    // // If the user is logged in, set them as the creator of the book.
+     if (req.user) {
       data.createdBy = req.user.displayName;
       data.createdById = req.user.id;
     } else {
@@ -139,27 +149,30 @@ router.post(
     if (req.file && req.file.cloudStoragePublicUrl) {
       data.imageUrl = req.file.cloudStoragePublicUrl;
 
-      console.log("Before vision!");
-      vision.detect(req.file.path, types, function(err, detections, apiResponse) {
-        if (err) {
-          res.end('Cloud Vision Error');
-        } else {
-          // Write out the JSON output of the Vision API
-          console.log("I am here!");
-          res.write(JSON.stringify(detections, null, 4));
-          // console.log(JSON.stringify(detections, null, 4));
-        }
-      });
+      detectLabelsGCS(bucket, 'image');
+
+      // console.log(file);
+      // vision.detect(file, types, function(err, detections, apiResponse) {
+      //   if (err) {
+      //     console.log(err);
+      //     res.end('Cloud Vision Error');
+      //   } else {
+      //     // Write out the JSON output of the Vision API
+      //     //console.log("I am here!");
+      //     res.write(JSON.stringify(detections, null, 4));
+      //     // console.log(JSON.stringify(detections, null, 4));
+      //   }
+      // });
     }
 
     // Save the data to the database.
-    getModel().create(data, true, (err, savedData) => {
-      if (err) {
-        next(err);
-        return;
-      }
-      res.redirect(`${req.baseUrl}/${savedData.id}`);
-    });
+    // getModel().create(data, true, (err, savedData) => {
+    //   if (err) {
+    //     next(err);
+    //     return;
+    //   }
+    //   res.redirect(`${req.baseUrl}/${savedData.id}`);
+    // });
   }
 );
 // [END add]
@@ -251,5 +264,26 @@ router.use((err, req, res, next) => {
   err.response = err.message;
   next(err);
 });
+
+function detectLabelsGCS (bucketName, fileName) {
+  // Instantiates clients
+
+
+  // The bucket where the file resides, e.g. "my-bucket"
+  const bucket = gcs.bucket(bucketName);
+  // The image file to analyze, e.g. "image.jpg"
+  const file = bucket.file(fileName);
+
+  // Performs label detection on the remote file
+  return vision.detectLabels(file)
+    .then((results) => {
+      const labels = results[0];
+
+      console.log('Labels:');
+      labels.forEach((label) => console.log(label));
+
+      return labels;
+    });
+}
 
 module.exports = router;

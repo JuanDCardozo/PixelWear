@@ -23,29 +23,18 @@ nconf
   .argv()
   // 2. Environment variables
   .env([
-    'CLOUD_BUCKET',
     'DATA_BACKEND',
     'GCLOUD_PROJECT',
     'MONGO_URL',
     'MONGO_COLLECTION',
     'MYSQL_USER',
     'MYSQL_PASSWORD',
-    'NODE_ENV',
-    'OAUTH2_CLIENT_ID',
-    'OAUTH2_CLIENT_SECRET',
-    'OAUTH2_CALLBACK',
-    'PORT',
-    'SECRET',
-    'SUBSCRIPTION_NAME',
-    'TOPIC_NAME'
+    'PORT'
   ])
   // 3. Config file
   .file({ file: path.join(__dirname, 'config.json') })
   // 4. Defaults
   .defaults({
-    // Typically you will create a bucket with the same name as your project ID.
-    CLOUD_BUCKET: '',
-
     // dataBackend can be 'datastore', 'cloudsql', or 'mongodb'. Be sure to
     // configure the appropriate settings for each storage engine below.
     // If you are unsure, use datastore as it requires no additional
@@ -53,29 +42,33 @@ nconf
     DATA_BACKEND: 'datastore',
 
     // This is the id of your project in the Google Cloud Developers Console.
-    GCLOUD_PROJECT: 'closet-156315',
+    GCLOUD_PROJECT: '',
 
-    // Connection url for the Memcache instance used to store session data
-    MEMCACHE_URL: 'memcached-18934.c8.us-east-1-3.ec2.cloud.redislabs.com:18934',
+    // MongoDB connection string
+    // https://docs.mongodb.org/manual/reference/connection-string/
+    MONGO_URL: 'mongodb://localhost:27017',
+    MONGO_COLLECTION: 'books',
 
-    OAUTH2_CLIENT_ID: '',
-    OAUTH2_CLIENT_SECRET: '',
-    OAUTH2_CALLBACK: 'http://localhost:8080/auth/google/callback',
+    MYSQL_USER: '',
+    MYSQL_PASSWORD: '',
 
     // Port the HTTP server
-    PORT: 8080,
-
-    SECRET: 'keyboardcat',
-
-    SUBSCRIPTION_NAME: 'shared-worker-subscription',
-    TOPIC_NAME: 'book-process-queue'
+    PORT: 8080
   });
 
 // Check for required settings
 checkConfig('GCLOUD_PROJECT');
-checkConfig('CLOUD_BUCKET');
-checkConfig('OAUTH2_CLIENT_ID');
-checkConfig('OAUTH2_CLIENT_SECRET');
+
+if (nconf.get('DATA_BACKEND') === 'cloudsql') {
+  checkConfig('MYSQL_USER');
+  checkConfig('MYSQL_PASSWORD');
+  if (nconf.get('NODE_ENV') === 'production') {
+    checkConfig('INSTANCE_CONNECTION_NAME');
+  }
+} else if (nconf.get('DATA_BACKEND') === 'mongodb') {
+  checkConfig('MONGO_URL');
+  checkConfig('MONGO_COLLECTION');
+}
 
 function checkConfig (setting) {
   if (!nconf.get(setting)) {

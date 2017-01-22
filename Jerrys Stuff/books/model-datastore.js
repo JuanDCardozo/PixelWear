@@ -15,13 +15,13 @@
 
 const Datastore = require('@google-cloud/datastore');
 const config = require('../config');
-const background = require('../lib/background');
-// var dataset = gcloud.datastore.dataset({projectId: process.env.GCLOUD_PROJECT});
 
+// [START config]
 const ds = Datastore({
   projectId: config.get('GCLOUD_PROJECT')
 });
 const kind = 'Book';
+// [END config]
 
 // Translates from Datastore's entity format to
 // the format expected by the application.
@@ -69,7 +69,7 @@ function fromDatastore (obj) {
 //   ]
 function toDatastore (obj, nonIndexed) {
   nonIndexed = nonIndexed || [];
-  let results = [];
+  const results = [];
   Object.keys(obj).forEach((k) => {
     if (obj[k] === undefined) {
       return;
@@ -87,6 +87,7 @@ function toDatastore (obj, nonIndexed) {
 // The ``limit`` argument determines the maximum amount of results to
 // return per page. The ``token`` argument allows requesting additional
 // pages. The callback is invoked with ``(err, books, nextPageToken)``.
+// [START list]
 function list (limit, token, cb) {
   const q = ds.createQuery([kind])
     .limit(limit)
@@ -102,30 +103,13 @@ function list (limit, token, cb) {
     cb(null, entities.map(fromDatastore), hasMore);
   });
 }
-
-// Similar to ``list``, but only lists the books created by the specified
-// user.
-function listBy (userId, limit, token, cb) {
-  const q = ds.createQuery([kind])
-    .filter('createdById', '=', userId)
-    .limit(limit)
-    .start(token);
-
-  ds.runQuery(q, (err, entities, nextQuery) => {
-    if (err) {
-      cb(err);
-      return;
-    }
-    const hasMore = nextQuery.moreResults !== Datastore.NO_MORE_RESULTS ? nextQuery.endCursor : false;
-    cb(null, entities.map(fromDatastore), hasMore);
-  });
-}
+// [END list]
 
 // Creates a new book or updates an existing book with new data. The provided
 // data is automatically translated into Datastore format. The book will be
 // queued for background processing.
 // [START update]
-function update (id, data, queueBook, cb) {
+function update (id, data, cb) {
   let key;
   if (id) {
     key = ds.key([kind, parseInt(id, 10)]);
@@ -141,19 +125,16 @@ function update (id, data, queueBook, cb) {
   ds.save(
     entity,
     (err) => {
-      if (err) {
-        cb(err);
-        return;
-      }
       data.id = entity.key.id;
-      if (queueBook) {
-        background.queueBook(data.id);
-      }
-      cb(null, data);
+      cb(err, err ? null : data);
     }
   );
 }
 // [END update]
+
+function create (data, cb) {
+  update(null, data, cb);
+}
 
 function read (id, cb) {
   const key = ds.key([kind, parseInt(id, 10)]);
@@ -178,13 +159,12 @@ function _delete (id, cb) {
   ds.delete(key, cb);
 }
 
+// [START exports]
 module.exports = {
-  create: (data, queueBook, cb) => {
-    update(null, data, queueBook, cb);
-  },
-  read: read,
-  update: update,
+  create,
+  read,
+  update,
   delete: _delete,
-  list: list,
-  listBy: listBy
+  list
 };
+// [END exports]
